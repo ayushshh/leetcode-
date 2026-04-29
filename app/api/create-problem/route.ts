@@ -25,20 +25,22 @@ export async function POST(request: Request) {
             tags,
             examples,
             constraints,
-            testcases,
+            hints,
+            editorial,
+            testCases,
             codeSnippets,
             referenceSolutions
         } = body;
 
-        if (!title || !description || !difficulty || !testcases || !codeSnippets || !referenceSolutions) {
+        if (!title || !description || !difficulty || !testCases || !codeSnippets || !referenceSolutions) {
             return NextResponse.json({
                 error: "required missing fields"
             }, { status: 400 })
         }
 
-        if (!Array.isArray(testcases) || testcases.length === 0) {
+        if (!Array.isArray(testCases) || testCases.length === 0) {
             return NextResponse.json({
-                error: "testcases must be an array with at least one element"
+                error: "testCases must be an array with at least one element"
             }, {
                 status: 400
             })
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
             }
 
             //prepare judge0 for the submission 
-            const submission = testcases.map((input, output) => ({
+            const submission = testCases.map(({input, output}) => ({
                 source_code: solutionCode,
                 language_id: languageId,
                 stdin: input,
@@ -68,7 +70,7 @@ export async function POST(request: Request) {
             }));
 
             const submissionResult = await submitBach(submission);
-            const tokens = submissionResult.map((res: any) => res.token);
+            const tokens = submissionResult.map((res: { token: string }) => res.token);
             const result = await pollBatchResults(tokens);
 
             for (let i = 0; i < result.length; i++) {
@@ -76,7 +78,7 @@ export async function POST(request: Request) {
                 if (results.status.id !== 3) {
                     return NextResponse.json({
                         error: `Failed to validate reference solution for language ${language}`,
-                        testcases: {
+                        testCases: {
                             input: submission[i].stdin,
                             expected_output: submission[i].expected_output,
                             actual_output: results.stdout,
@@ -106,7 +108,9 @@ export async function POST(request: Request) {
                 tags: tags,
                 examples: examples,
                 constraints: constraints,
-                testCases: testcases,
+                hints: hints,
+                editorial: editorial,
+                testCases: testCases,
                 codeSnippets: codeSnippets,
                 referenceSolutions: referenceSolutions,
                 userId: user.id,
@@ -114,8 +118,12 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json({ success: true, problem: saveProblem }, { status: 201 });
-    } catch (error) {
-        console.log(error);
-        return NextResponse.json({ error: "Failed to create problem" }, { status: 500 });
-    }
+    // in route.ts - update the catch block
+} catch (error) {
+    console.error("FULL ERROR:", error); // already there but let's check
+    return NextResponse.json({ 
+        error: "Failed to create problem",
+        details: error instanceof Error ? error.message : String(error)  // ADD THIS
+    }, { status: 500 });
+}
 }
