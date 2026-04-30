@@ -31,8 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import react from "react";
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 
 // problem schema verification
 const problemSchema = z.object({
@@ -80,8 +79,15 @@ const problemSchema = z.object({
   }),
 });
 
+// ─── Language union ──────────────────────────────────────────────────────────
+type Language = "JAVASCRIPT" | "PYTHON" | "JAVA";
+const LANGUAGES: Language[] = ["JAVASCRIPT", "PYTHON", "JAVA"];
+
+// ─── Infer form type from schema ─────────────────────────────────────────────
+type ProblemFormValues = z.infer<typeof problemSchema>;
+
 // Sample problem data for pre-filling the form
-const sampledpData = {
+const sampledpData: ProblemFormValues = {
   title: "Climbing Stairs",
   description:
     "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
@@ -245,7 +251,7 @@ class Main {
 };
 
 // Sample problem data for another type of question
-const sampleStringProblem = {
+const sampleStringProblem: ProblemFormValues = {
   title: "Valid Palindrome",
   description:
     "A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers. Given a string s, return true if it is a palindrome, or false otherwise.",
@@ -445,9 +451,15 @@ public class Main {
   },
 };
 
-const CodeEditor = ({ value, onChange, language = "javascript" }) => {
+interface CodeEditorProps {
+  value: string;
+  onChange: (value: string | undefined) => void;
+  language?: string;
+}
+
+const CodeEditor = ({ value, onChange, language = "javascript" }: CodeEditorProps) => {
   // Map language names to Monaco Editor language IDs
-  const languageMap = {
+  const languageMap: Record<string, string> = {
     javascript: "javascript",
     python: "python",
     java: "java",
@@ -539,17 +551,21 @@ export function CreateProblemForm() {
     name: "tags",
   });
 
-const onSubmit = async (values) => {
+const onSubmit = async (values: ProblemFormValues) => {
   try {
     setIsLoading(true);
-    console.log("Submitting values:", JSON.stringify(values, null, 2)); // ADD THIS
+    console.log("Submitting values:", JSON.stringify(values, null, 2));
     const response = await axios.post("/api/create-problem", values);
     toast.success(response.data.message || "Problem created successfully");
     router.push("/problems");
   } catch (error) {
-    console.error("Full error response:", error.response?.data); // ADD THIS
-    console.error("Status:", error.response?.status);
-    toast.error(error.response?.data?.message || "Failed to create problem");
+    if (isAxiosError(error)) {
+      console.error("Full error response:", error.response?.data);
+      console.error("Status:", error.response?.status);
+      toast.error(error.response?.data?.message || "Failed to create problem");
+    } else {
+      toast.error("An unexpected error occurred");
+    }
   } finally {
     setIsLoading(false);
   }
@@ -829,7 +845,7 @@ const onSubmit = async (values) => {
             </Card>
 
             {/* Code Editor Sections */}
-            {["JAVASCRIPT", "PYTHON", "JAVA"].map((language) => (
+            {LANGUAGES.map((language) => (
               <Card key={language} className="bg-slate-50 dark:bg-slate-950/20">
                 <CardHeader>
                   <CardTitle className="text-xl flex items-center gap-2">
@@ -847,7 +863,7 @@ const onSubmit = async (values) => {
                     </CardHeader>
                     <CardContent>
                       <Controller
-                        name={`codeSnippets.${language}`}
+                        name={`codeSnippets.${language}` as `codeSnippets.${Language}`}
                         control={control}
                         render={({ field }) => (
                           <CodeEditor
@@ -859,7 +875,7 @@ const onSubmit = async (values) => {
                       />
                       {errors.codeSnippets?.[language] && (
                         <p className="text-sm text-red-500 mt-2">
-                          {errors.codeSnippets[language].message}
+                          {errors.codeSnippets[language]?.message}
                         </p>
                       )}
                     </CardContent>
@@ -875,7 +891,7 @@ const onSubmit = async (values) => {
                     </CardHeader>
                     <CardContent>
                       <Controller
-                        name={`referenceSolutions.${language}`}
+                        name={`referenceSolutions.${language}` as `referenceSolutions.${Language}`}
                         control={control}
                         render={({ field }) => (
                           <CodeEditor
@@ -887,7 +903,7 @@ const onSubmit = async (values) => {
                       />
                       {errors.referenceSolutions?.[language] && (
                         <p className="text-sm text-red-500 mt-2">
-                          {errors.referenceSolutions[language].message}
+                          {errors.referenceSolutions[language]?.message}
                         </p>
                       )}
                     </CardContent>
@@ -903,33 +919,33 @@ const onSubmit = async (values) => {
                         <div>
                           <Label className="font-medium">Input</Label>
                           <Textarea
-                            {...register(`examples.${language}.input`)}
+                            {...register(`examples.${language}.input` as `examples.${Language}.input`)}
                             placeholder="Example input"
                             className="mt-2 min-h-20 resize-y font-mono"
                           />
                           {errors.examples?.[language]?.input && (
                             <p className="text-sm text-red-500 mt-1">
-                              {errors.examples[language].input.message}
+                              {errors.examples[language]?.input?.message}
                             </p>
                           )}
                         </div>
                         <div>
                           <Label className="font-medium">Output</Label>
                           <Textarea
-                            {...register(`examples.${language}.output`)}
+                            {...register(`examples.${language}.output` as `examples.${Language}.output`)}
                             placeholder="Example output"
                             className="mt-2 min-h-20 resize-y font-mono"
                           />
                           {errors.examples?.[language]?.output && (
                             <p className="text-sm text-red-500 mt-1">
-                              {errors.examples[language].output.message}
+                              {errors.examples[language]?.output?.message}
                             </p>
                           )}
                         </div>
                         <div className="md:col-span-2">
                           <Label className="font-medium">Explanation</Label>
                           <Textarea
-                            {...register(`examples.${language}.explanation`)}
+                            {...register(`examples.${language}.explanation` as `examples.${Language}.explanation`)}
                             placeholder="Explain the example"
                             className="mt-2 min-h-24 resize-y"
                           />
