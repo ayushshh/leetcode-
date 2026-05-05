@@ -16,6 +16,24 @@ export function getJudgeZeroId(language: string | undefined) {
     return languageMap[language.toUpperCase()];
 }
 
+export function getJudge0LanguageName(id : number | string | undefined){
+    if(typeof(id) !== "number" || !id){
+        return;
+    }
+    if(typeof(id) === "string"){
+        id = parseInt(id);
+    }
+    const idMap: Record<number, string> = {
+        71: "PYTHON",
+        60: "GO",
+        63: "JAVASCRIPT",
+        62: "JAVA",
+        54: "CPP"
+    };
+    
+    return idMap[id];
+}
+
 
 export async function submitBach(submission: Array<object>) {
     if (!process.env.JUDGE0_API_URL) {

@@ -498,6 +498,7 @@ export function CreateProblemForm() {
     const router = useRouter();
     const [sampleType, setSampleType] = useState("DP");
     const [isLoading, setIsLoading] = useState(false);
+    const [tags, setTags] = useState<string[]>([""]);
 
     const form = useForm({
     resolver: zodResolver(problemSchema),
@@ -527,6 +528,7 @@ export function CreateProblemForm() {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = form;
 
@@ -540,16 +542,24 @@ export function CreateProblemForm() {
     control,
     name: "testCases",
   });
-  //this is for tags 
-    const {
-    fields: tagFields,
-    append: appendTag,
-    remove: removeTag,
-    replace: replaceTags,
-  } = useFieldArray({
-    control,
-    name: "tags",
-  });
+
+  // tag helpers — managed via useState + setValue to stay compatible with z.array(z.string())
+  const addTag = () => {
+    const next = [...tags, ""];
+    setTags(next);
+    setValue("tags", next);
+  };
+  const removeTag = (index: number) => {
+    if (tags.length === 1) return;
+    const next = tags.filter((_, i) => i !== index);
+    setTags(next);
+    setValue("tags", next);
+  };
+  const updateTag = (index: number, value: string) => {
+    const next = tags.map((t, i) => (i === index ? value : t));
+    setTags(next);
+    setValue("tags", next);
+  };
 
 const onSubmit = async (values: ProblemFormValues) => {
   try {
@@ -578,9 +588,10 @@ const onSubmit = async (values: ProblemFormValues) => {
   //   reset(sampleData);
   // };
   const loadSampleData = () => {
-  const sampleData = sampleType === "DP" ? sampledpData : sampleStringProblem;
-  reset(sampleData);
-};
+    const sampleData = sampleType === "DP" ? sampledpData : sampleStringProblem;
+    setTags(sampleData.tags);
+    reset(sampleData);
+  };
 
   return(
       <div className="container mx-auto py-8 px-4 max-w-7xl">
@@ -729,7 +740,7 @@ const onSubmit = async (values: ProblemFormValues) => {
                   <Button
                     type="button"
                     size="sm"
-                    onClick={() => appendTag("")}
+                    onClick={addTag}
                     className="gap-2"
                   >
                     <Plus className="w-4 h-4" /> Add Tag
@@ -738,10 +749,11 @@ const onSubmit = async (values: ProblemFormValues) => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {tagFields.map((field, index) => (
-                    <div key={field.id} className="flex gap-2 items-center">
+                  {tags.map((tag, index) => (
+                    <div key={index} className="flex gap-2 items-center">
                       <Input
-                        {...register(`tags.${index}`)}
+                        value={tag}
+                        onChange={(e) => updateTag(index, e.target.value)}
                         placeholder="Enter tag"
                         className="flex-1"
                       />
@@ -750,7 +762,7 @@ const onSubmit = async (values: ProblemFormValues) => {
                         variant="ghost"
                         size="sm"
                         onClick={() => removeTag(index)}
-                        disabled={tagFields.length === 1}
+                        disabled={tags.length === 1}
                         className="p-2"
                       >
                         <Trash2 className="w-4 h-4 text-red-500" />
