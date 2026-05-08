@@ -21,7 +21,7 @@ const Navbar = ({userRole} : {userRole: UserRole}) => {
           <Link href={"/"} className="flex items-center gap-2">
             <Image src={"/logo.svg"} alt="TreeBio" width={42} height={42} />
             <span className="font-bold text-2xl tracking-widest text-amber-300">
-              LeetCode
+              CodeArena
             </span>
           </Link>
 
