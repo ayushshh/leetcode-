@@ -21,7 +21,7 @@ CodeArena is a high-performance, full-stack coding practice platform designed fo
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [Shadcn UI](https://ui.shadcn.com/)
 - **Database**: [PostgreSQL](https://www.postgresql.org/) with [Prisma ORM](https://www.prisma.io/)
 - **Authentication**: [Clerk](https://clerk.com/)
-- **Execution Engine**: [Judge0](https://judge0.com/)
+- **Execution Engine**: [Judge0](https://judge0.com/) & [RapidJudge0CE](https://rapidapi.com/judge0-official/api/judge0-ce)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **State Management**: [Zustand](https://docs.pmnd.rs/zustand/getting-started/introduction)
 - **API Client**: [Axios](https://axios-http.com/)
@@ -30,7 +30,7 @@ CodeArena is a high-performance, full-stack coding practice platform designed fo
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - PostgreSQL database
 - Clerk API Keys
 - Judge0 Instance (Local or Remote)
@@ -38,18 +38,21 @@ CodeArena is a high-performance, full-stack coding practice platform designed fo
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-username/codearena.git
    cd codearena
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up Environment Variables**
    Create a `.env` file in the root directory and add the following:
+
    ```env
    DATABASE_URL="postgresql://user:password@localhost:5432/codearena"
    NEXT_PUBLIC_CLERK_PUBLISHED_KEY=your_key
@@ -58,12 +61,14 @@ CodeArena is a high-performance, full-stack coding practice platform designed fo
    ```
 
 4. **Initialize Database**
+
    ```bash
    npx prisma generate
    npx prisma db push
    ```
 
 5. **Run the development server**
+
    ```bash
    npm run dev
    ```
