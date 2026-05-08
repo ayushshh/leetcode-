@@ -28,6 +28,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { deleteProblem } from '../actions';
+import AddToPlaylist from "./add-to-playlist";
+import CreatePlaylist from "./create-playlist";
+import axios from "axios";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,104 +71,97 @@ const difficultyConfig = {
   },
 };
 
-// ─── Inline Modal: Create Playlist ────────────────────────────────────────────
 
-interface CreatePlaylistModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (name: string, description: string) => void;
-}
+// function CreatePlaylistModal({ isOpen, onClose, onSubmit }: CreatePlaylistModalProps) {
+//   const [name, setName] = useState("");
+//   const [description, setDescription] = useState("");
+//   if (!isOpen) return null;
 
-function CreatePlaylistModal({ isOpen, onClose, onSubmit }: CreatePlaylistModalProps) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  if (!isOpen) return null;
+//   const handleSubmit = (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!name.trim()) { toast.error("Playlist name is required."); return; }
+//     onSubmit(name.trim(), description.trim());
+//     setName(""); setDescription("");
+//   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) { toast.error("Playlist name is required."); return; }
-    onSubmit(name.trim(), description.trim());
-    setName(""); setDescription("");
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-2xl shadow-2xl w-full max-w-md p-7 space-y-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Create Playlist</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Organise problems into a collection</p>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Name</label>
-            <Input placeholder="e.g. Dynamic Programming" value={name} onChange={(e) => setName(e.target.value)} required className="rounded-xl" />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Description <span className="font-normal text-gray-400">(optional)</span></label>
-            <Input placeholder="Brief description..." value={description} onChange={(e) => setDescription(e.target.value)} className="rounded-xl" />
-          </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} className="rounded-xl">Cancel</Button>
-            <Button type="submit" className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white border-0">Create Playlist</Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+//       <div className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-2xl shadow-2xl w-full max-w-md p-7 space-y-5">
+//         <div className="flex items-center justify-between">
+//           <div>
+//             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Create Playlist</h2>
+//             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Organise problems into a collection</p>
+//           </div>
+//           <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+//             <X className="h-5 w-5" />
+//           </button>
+//         </div>
+//         <form onSubmit={handleSubmit} className="space-y-4">
+//           <div className="space-y-1.5">
+//             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Name</label>
+//             <Input placeholder="e.g. Dynamic Programming" value={name} onChange={(e) => setName(e.target.value)} required className="rounded-xl" />
+//           </div>
+//           <div className="space-y-1.5">
+//             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Description <span className="font-normal text-gray-400">(optional)</span></label>
+//             <Input placeholder="Brief description..." value={description} onChange={(e) => setDescription(e.target.value)} className="rounded-xl" />
+//           </div>
+//           <div className="flex justify-end gap-3 pt-2">
+//             <Button type="button" variant="outline" onClick={onClose} className="rounded-xl">Cancel</Button>
+//             <Button type="submit" className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white border-0">Create Playlist</Button>
+//           </div>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// }
 
 // ─── Inline Modal: Add To Playlist ────────────────────────────────────────────
 
-interface AddToPlaylistModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (playlistId: string) => void;
-  problemId: string | null;
-}
+// interface AddToPlaylistModalProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+//   onSubmit: (playlistId: string) => void;
+//   problemId: string | null;
+// }
 
-function AddToPlaylistModal({ isOpen, onClose, onSubmit, problemId }: AddToPlaylistModalProps) {
-  const [playlistId, setPlaylistId] = useState("");
-  if (!isOpen || !problemId) return null;
+// function AddToPlaylistModal({ isOpen, onClose, onSubmit, problemId }: AddToPlaylistModalProps) {
+//   const [playlistId, setPlaylistId] = useState("");
+//   if (!isOpen || !problemId) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!playlistId.trim()) { toast.error("Please enter a playlist ID."); return; }
-    onSubmit(playlistId.trim());
-    setPlaylistId("");
-  };
+//   const handleSubmit = (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!playlistId.trim()) { toast.error("Please enter a playlist ID."); return; }
+//     onSubmit(playlistId.trim());
+//     setPlaylistId("");
+//   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-2xl shadow-2xl w-full max-w-md p-7 space-y-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Save to Playlist</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Add this problem to a collection</p>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Playlist ID</label>
-            <Input placeholder="Enter playlist ID..." value={playlistId} onChange={(e) => setPlaylistId(e.target.value)} required className="rounded-xl" />
-            {/* TODO: Replace with a searchable dropdown */}
-          </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} className="rounded-xl">Cancel</Button>
-            <Button type="submit" className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white border-0">Save</Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+//       <div className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-2xl shadow-2xl w-full max-w-md p-7 space-y-5">
+//         <div className="flex items-center justify-between">
+//           <div>
+//             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Save to Playlist</h2>
+//             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Add this problem to a collection</p>
+//           </div>
+//           <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+//             <X className="h-5 w-5" />
+//           </button>
+//         </div>
+//         <form onSubmit={handleSubmit} className="space-y-4">
+//           <div className="space-y-1.5">
+//             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Playlist ID</label>
+//             <Input placeholder="Enter playlist ID..." value={playlistId} onChange={(e) => setPlaylistId(e.target.value)} required className="rounded-xl" />
+//             {/* TODO: Replace with a searchable dropdown */}
+//           </div>
+//           <div className="flex justify-end gap-3 pt-2">
+//             <Button type="button" variant="outline" onClick={onClose} className="rounded-xl">Cancel</Button>
+//             <Button type="submit" className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white border-0">Save</Button>
+//           </div>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// }
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
@@ -210,14 +206,43 @@ function ProblemsTable({ problems, user }: ProblemsTableProps) {
     }
     
   };
-  const handleCreatePlaylist = async (name: string, _desc: string) => {
-    toast.success(`Playlist "${name}" creation not yet implemented.`);
-    setIsCreateModalOpen(false);
+  const handleCreatePlaylist = async (data: { name: string; description: string }) => {
+    try {
+      const response = await axios.post("/api/playlists", {
+        name: data.name,
+        description: data.description,
+      });
+      const result = response.data; // axios already parses JSON — no await needed
+      if (result.success) {
+        setIsCreateModalOpen(false);
+        toast.success("Playlist created successfully!");
+      } else {
+        toast.error(result.error ?? "Failed to create playlist");
+      }
+    } catch (error) {
+      console.error("❌ Error creating playlist: ", error);
+      toast.error("Something went wrong!");
+    }
   };
-  const handleAddToPlaylist = async (_playlistId: string) => {
-    toast.success("Adding to playlist not yet implemented.");
-    setIsAddToPlaylistModalOpen(false);
-    setSelectedProblemId(null);
+
+  const handleAddToPlaylist = async (problemId: string, playlistId: string) => {
+    try {
+      const response = await axios.post("/api/playlists/add-Problem", {
+        problemId,
+        playlistId,
+      });
+      const result = response.data; // axios already parses JSON — no await needed
+      if (result.success) {
+        setIsAddToPlaylistModalOpen(false);
+        setSelectedProblemId(null);
+        toast.success("Problem added to playlist!");
+      } else {
+        toast.error(result.error ?? "Failed to add to playlist");
+      }
+    } catch (error) {
+      console.error("❌ Error adding problem to playlist: ", error);
+      toast.error("Something went wrong!");
+    }
   };
 
   const solvedCount = (problems || []).filter((p) => p.solvedBy.length > 0).length;
@@ -472,16 +497,16 @@ function ProblemsTable({ problems, user }: ProblemsTableProps) {
       )}
 
       {/* ── Modals ─────────────────────────────────────────────────────── */}
-      <CreatePlaylistModal
+      <CreatePlaylist
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreatePlaylist}
       />
-      <AddToPlaylistModal
+      <AddToPlaylist
         isOpen={isAddToPlaylistModalOpen}
         onClose={() => { setIsAddToPlaylistModalOpen(false); setSelectedProblemId(null); }}
         onSubmit={handleAddToPlaylist}
-        problemId={selectedProblemId}
+        problemId={selectedProblemId ?? ""}
       />
     </div>
   );

@@ -37,9 +37,10 @@ import {
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { getJudgeZeroId } from "@/lib/judge0";
-import { getProblemById, executeCode } from "@/modules/problems/actions";
+import { getProblemById, executeCode, getAllSubmissionByCurrentUserForProblem } from "@/modules/problems/actions";
 import { SubmissionDetails } from "@/modules/problems/components/submission-details";
 import { SubmissionHistory } from "@/modules/problems/components/submission-history";
+import { TestCaseTable } from "@/modules/problems/components/testcase-table";
 
 /* ─── helpers ─────────────────────────────────────────────────── */
 
@@ -113,6 +114,30 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
     }
   }, [selectedLanguage, problem]);
 
+  /* fetch submissions */
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      try {
+        const resolvedParams = await params;
+        const { success, data: submissionHistory, error } = await getAllSubmissionByCurrentUserForProblem(resolvedParams.id);
+        if(error) {
+          toast.error(error);
+          setSubmissionHistory([]);
+          return;
+        }
+        if(!success) {
+          toast.error("Failed to fetch submissions");
+          setSubmissionHistory([]);
+          return;
+        }
+        setSubmissionHistory(submissionHistory || []);
+      } catch (error) {
+        console.error("Error fetching submissions:", error);
+      }
+    };
+    fetchSubmissions();
+  }, [params]);
+
   /* loading */
   if (!problem) {
     return (
@@ -127,6 +152,7 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
       </div>
     );
   }
+
 
   /* handlers */
   const handleRun = async () => {
@@ -442,10 +468,13 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
 
           {/* Test Cases / Results */}
-          <div className="flex-none max-h-64 overflow-y-auto bg-[#0E1015]">
+          <div className="flex-none max-h-72 overflow-y-auto bg-[#0E1015]">
             {executionResponse ? (
-              <div className="p-4">
+              <div className="p-4 space-y-4">
                 <SubmissionDetails submission={executionResponse} />
+                {executionResponse.testCases && executionResponse.testCases.length > 0 && (
+                  <TestCaseTable testCases={executionResponse.testCases} />
+                )}
               </div>
             ) : (
               <TestCasesPanel testCases={problem.testCases} />

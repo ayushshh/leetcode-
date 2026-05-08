@@ -216,3 +216,23 @@ export const executeCode = async (
         return { success: false, error: "Failed to execute code" };
     }
 };
+
+export const getAllSubmissionByCurrentUserForProblem = async (problemId: string) => {
+    const user = await currentUser();
+    if(!user) return { success: false, error: "Unauthorized" };
+
+    const dbUser = await db.user.findUnique({
+        where: {
+            clerkId: user?.id
+        }
+    })
+
+    const submissions = await db.submission.findMany({
+        where: {
+            userId: dbUser?.id,
+            problemId: problemId
+        }
+    })
+    if(!submissions) return { success: false, error: "No submissions found" };
+    return { success: true, data: submissions };
+}
