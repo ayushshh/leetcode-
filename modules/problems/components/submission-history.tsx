@@ -67,13 +67,13 @@ export const SubmissionHistory = ({ submissions = [] }: SubmissionHistoryProps) 
   if (!submissions.length) {
     return (
       <Card className="w-full bg-[#0E1015] border border-zinc-800/60 shadow-sm">
-        <CardContent className="flex flex-col items-center justify-center py-20 gap-4 text-zinc-500">
-          <div className="p-4 rounded-full bg-zinc-800/30">
-            <History className="w-8 h-8 text-zinc-400" />
+        <CardContent className="flex flex-col items-center justify-center py-24 gap-5 text-zinc-500">
+          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-zinc-900/30 border border-dashed border-zinc-700/60">
+            <History className="w-7 h-7 text-zinc-500" />
           </div>
-          <div className="text-center space-y-1">
-            <p className="text-[14px] font-medium text-zinc-300">No submissions yet</p>
-            <p className="text-[13px]">Your past code executions will appear here.</p>
+          <div className="text-center space-y-1.5">
+            <p className="text-[15px] font-semibold text-zinc-300 tracking-tight">No submissions yet</p>
+            <p className="text-[13px] text-zinc-500">Your code execution history will appear here.</p>
           </div>
         </CardContent>
       </Card>
@@ -82,8 +82,8 @@ export const SubmissionHistory = ({ submissions = [] }: SubmissionHistoryProps) 
 
   // ─── HISTORY LIST ─────────────────────────────────────────────────────────
   return (
-    <Card className="w-full bg-[#0E1015] border border-zinc-800/60 shadow-sm overflow-hidden">
-      <CardHeader className="border-b border-zinc-800/60 bg-zinc-900/20 pb-4">
+    <Card className="w-full bg-[#0E1015] border border-zinc-800/60 shadow-sm overflow-hidden flex flex-col">
+      <CardHeader className="border-b border-zinc-800/60 bg-gradient-to-b from-zinc-900/30 to-transparent pb-4">
         <CardTitle className="text-[16px] font-semibold text-zinc-100 tracking-tight">
           Submission History
         </CardTitle>
@@ -101,16 +101,21 @@ export const SubmissionHistory = ({ submissions = [] }: SubmissionHistoryProps) 
               return (
                 <div 
                   key={submission.id} 
-                  className="flex flex-col gap-3 p-4 rounded-lg bg-zinc-900/30 border border-zinc-800/50 hover:bg-zinc-800/40 hover:border-zinc-700/50 transition-all"
+                  className={cn(
+                    "group flex flex-col gap-4 p-4 rounded-xl bg-zinc-900/20 border transition-all duration-300",
+                    isAccepted 
+                      ? "border-zinc-800/50 border-l-[3px] border-l-emerald-500/40 hover:border-l-emerald-500 hover:bg-zinc-800/30" 
+                      : "border-zinc-800/50 border-l-[3px] border-l-red-500/40 hover:border-l-red-500 hover:bg-zinc-800/30"
+                  )}
                 >
                   {/* Top Row: Status & Date */}
                   <div className="flex items-center justify-between">
                     <span 
                       className={cn(
-                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold border shadow-sm",
+                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider border shadow-sm transition-colors",
                         isAccepted 
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                          : "bg-red-500/10 text-red-400 border-red-500/20"
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20" 
+                          : "bg-red-500/10 text-red-400 border-red-500/20 group-hover:bg-red-500/20"
                       )}
                     >
                       {isAccepted ? (
@@ -122,40 +127,40 @@ export const SubmissionHistory = ({ submissions = [] }: SubmissionHistoryProps) 
                     </span>
 
                     <div className="flex items-center gap-1.5 text-[12px] text-zinc-500 font-medium">
-                      <CalendarDays className="h-3.5 w-3.5 opacity-70" />
+                      <CalendarDays className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
                       {formatDate(submission.createdAt)}
                     </div>
                   </div>
 
-                  {/* Bottom Row: Metrics Grid */}
-                  <div className="grid grid-cols-3 gap-4 pt-3 border-t border-zinc-800/50">
+                  {/* Bottom Row: Nested Metrics Grid */}
+                  <div className="grid grid-cols-3 gap-3">
                     
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-1 p-2.5 rounded-lg bg-zinc-950/40 border border-zinc-800/40">
                       <div className="flex items-center gap-1.5 text-zinc-500">
                         <Code className="h-3.5 w-3.5" />
                         <span className="text-[10px] font-semibold uppercase tracking-wider">Language</span>
                       </div>
-                      <p className="text-[13px] font-medium text-zinc-200 pl-5">
+                      <p className="text-[13px] font-medium text-zinc-200 mt-0.5">
                         {submission.language}
                       </p>
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-1 p-2.5 rounded-lg bg-zinc-950/40 border border-zinc-800/40">
                       <div className="flex items-center gap-1.5 text-zinc-500">
                         <Cpu className="h-3.5 w-3.5" />
                         <span className="text-[10px] font-semibold uppercase tracking-wider">Memory</span>
                       </div>
-                      <p className="text-[13px] font-mono text-zinc-200 pl-5">
+                      <p className="text-[13px] font-mono text-zinc-200 mt-0.5">
                         {formatMemory(submission.memory)}
                       </p>
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-1 p-2.5 rounded-lg bg-zinc-950/40 border border-zinc-800/40">
                       <div className="flex items-center gap-1.5 text-zinc-500">
                         <Clock className="h-3.5 w-3.5" />
                         <span className="text-[10px] font-semibold uppercase tracking-wider">Time</span>
                       </div>
-                      <p className="text-[13px] font-mono text-zinc-200 pl-5">
+                      <p className="text-[13px] font-mono text-zinc-200 mt-0.5">
                         {formatTime(submission.time)}
                       </p>
                     </div>
